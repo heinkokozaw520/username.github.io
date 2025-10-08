@@ -1,15 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate QRCode</title>
-   
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fruit Data</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    .item { border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+  </style>
 </head>
 <body>
-   <h1>hello world</h1>
- 
-   
-</body>
+  <h2>Fruit List</h2>
+  <div id="data">Loading...</div>
 
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbwT5Lu42hEyWqGygFLlU0036E1MhYwX-5asBZTnQb_L5yCutDooYrqOEHOZh2ehvmHw/exec"; // your GAS link here
+
+    async function loadData() {
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        let html = "";
+        data.forEach(r => {
+          html += `
+            <div class="item">
+              <b>Fruit:</b> ${r.Fruit}<br>
+              <b>Type:</b> ${r.Type}<br>
+              <b>Total:</b> ${r.Total}
+            </div>
+          `;
+        });
+        document.getElementById("data").innerHTML = html;
+      } catch (err) {
+        document.getElementById("data").innerHTML = "Error loading data.";
+        console.error(err);
+      }
+    }
+    loadData();
+  </script>
+</body>
 </html>
