@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Roadmap Dashboard</title>
+  <style>
+    /* =========================================================
+       DESIGN TOKENS
+    ========================================================= */
+    :root {
+      --bg-base:    #0d0f1a;
+      --bg-card:    #141628;
+      --bg-card2:   #1a1d35;
+      --bg-input:   #1e2140;
+      --border:     #2a2f55;
+      --border-glow:#4a5aff44;
+
+      --grad-a:     #4a6fff;
+      --grad-b:     #9b5de5;
+      --grad-c:     #c77dff;
+      --grad-text:  linear-gradient(90deg, var(--grad-a), var(--grad-b), var(--grad-c));
+
+      --text-1:     #f0f2ff;
+      --text-2:     #9fa8d6;
+      --text-3:     #5f6898;
+
+      --green:      #34d399;
+      --yellow:     #fbbf24;
+      --red:        #f87171;
+      --cyan:       #22d3ee;
+
+      --radius-sm:  8px;
+      --radius:     14px;
+      --radius-lg:  20px;
+
+      --shadow:     0 4px 32px #0008;
+      --glow-blue:  0 0 24px #4a6fff33;
+      --glow-purp:  0 0 24px #9b5de533;
+
+      --font-display: 'Segoe UI', system-ui, sans-serif;
+      --font-mono:    'Courier New', monospace;
+
+      --nav-h:      64px;
+      --transition: .25s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* =========================================================
+       RESET & BASE
+    ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 15px; }
+    body {
+      font-family: var(--font-display);
+      background: var(--bg-base);
+      color: var(--text-1);
+      min-height: 100vh;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+    a { color: var(--grad-a); text-decoration: none; }
+    a:hover { color: var(--grad-c); }
+    ul { list-style: none; }
+    button { cursor: pointer; font-family: inherit; }
+    input, textarea { font-family: inherit; }
+    ::-webkit-scrollbar { width: 7px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* =========================================================
+       UTILITY CLASSES
+    ========================================================= */
+    .grad-text {
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .section-title .icon { font-size: 1.3rem; }
+    .badge {
+      display: inline-block;
+      padding: .18em .7em;
+      border-radius: 99px;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+    }
+    .badge-blue  { background: #4a6fff22; color: var(--grad-a); border: 1px solid #4a6fff44; }
+    .badge-purp  { background: #9b5de522; color: var(--grad-c); border: 1px solid #9b5de544; }
+    .badge-green { background: #34d39922; color: var(--green);   border: 1px solid #34d39944; }
+    .badge-yellow{ background: #fbbf2422; color: var(--yellow);  border: 1px solid #fbbf2444; }
+    .badge-cyan  { background: #22d3ee22; color: var(--cyan);    border: 1px solid #22d3ee44; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .55rem 1.2rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card2);
+      color: var(--text-1);
+      font-size: .88rem;
+      font-weight: 500;
+      transition: all var(--transition);
+    }
+    .btn:hover {
+      border-color: var(--grad-a);
+      box-shadow: var(--glow-blue);
+      transform: translateY(-1px);
+    }
+    .btn-grad {
+      background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+      border: none;
+      color: #fff;
+    }
+    .btn-grad:hover { box-shadow: var(--glow-blue); }
+    .btn-danger {
+      background: #f8717122;
+      border-color: #f8717144;
+      color: var(--red);
+    }
+    .btn-danger:hover { background: #f8717133; box-shadow: 0 0 16px #f8717133; }
+
+    /* =========================================================
+       NAVIGATION
+    ========================================================= */
+    #nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: #0d0f1acc;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+    }
+    .nav-inner {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .nav-logo {
+      font-size: 1.05rem;
+      font-weight: 700;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: .15rem;
+      overflow-x: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-link {
+      padding: .35rem .75rem;
+      border-radius: var(--radius-sm);
+      font-size: .82rem;
+      font-weight: 500;
+      color: var(--text-2);
+      transition: all var(--transition);
+      white-space: nowrap;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-1);
+      background: var(--bg-card2);
+      border-color: var(--border);
+    }
+    .nav-link.active { color: var(--grad-a); }
+
+    /* hamburger */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      padding: .4rem;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--text-2);
+      border-radius: 2px;
+      transition: all var(--transition);
+    }
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: var(--nav-h);
+      left: 0; right: 0;
+      background: #0d0f1aee;
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      z-index: 999;
+      flex-direction: column;
+      gap: .4rem;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav .nav-link { width: 100%; }
+
+    /* =========================================================
+       LAYOUT
+    ========================================================= */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: calc(var(--nav-h) + 2rem) 1.25rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3.5rem;
+    }
+
+    /* =========================================================
+       HERO
+    ========================================================= */
+    #hero {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: .18;
+      pointer-events: none;
+    }
+    .hero-glow-1 { background: var(--grad-a); top: -100px; left: 10%; }
+    .hero-glow-2 { background: var(--grad-b); bottom: -100px; right: 10%; }
+    .hero-eyebrow {
+      font-size: .82rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: .8rem;
+    }
+    .hero-title {
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.2rem;
+      letter-spacing: -.02em;
+    }
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-2);
+      max-width: 540px;
+      margin: 0 auto 2rem;
+    }
+    .hero-quote {
+      display: inline-block;
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--grad-a);
+      border-radius: var(--radius-sm);
+      padding: .9rem 1.4rem;
+      font-style: italic;
+      color: var(--text-2);
+      font-size: .95rem;
+      max-width: 560px;
+      margin-bottom: 2.5rem;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .hero-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      min-width: 130px;
+      text-align: center;
+    }
+    .hero-stat-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-stat-label { font-size: .78rem; color: var(--text-3); margin-top: .15rem; }
+
+    /* =========================================================
+       ROADMAP TIMELINE
+    ========================================================= */
+    .roadmap-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+    .roadmap-timeline::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 52px;
+      bottom: 52px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--grad-a), var(--grad-b), var(--grad-c));
+      opacity: .35;
+    }
+    .phase-block {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+      padding: 1.25rem 0;
+    }
+    .phase-dot {
+      flex-shrink: 0;
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      border: 2px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .phase-dot-1 { background: linear-gradient(135deg,#4a6fff22,#4a6fff44); border-color: var(--grad-a); color: var(--grad-a); }
+    .phase-dot-2 { background: linear-gradient(135deg,#9b5de522,#9b5de544); border-color: var(--grad-b); color: var(--grad-b); }
+    .phase-dot-3 { background: linear-gradient(135deg,#c77dff22,#c77dff44); border-color: var(--grad-c); color: var(--grad-c); }
+    .phase-content { flex: 1; }
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: .75rem;
+      flex-wrap: wrap;
+    }
+    .phase-title { font-size: 1.15rem; font-weight: 700; }
+    .phase-duration { font-size: .8rem; color: var(--text-3); }
+    .phase-goal { color: var(--text-2); margin-bottom: 1rem; font-size: .93rem; }
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+    .skill-tag {
+      padding: .3em .8em;
+      border-radius: 99px;
+      font-size: .78rem;
+      font-weight: 500;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+    }
+    .phase-criteria {
+      font-size: .85rem;
+      color: var(--green);
+      background: #34d39910;
+      border: 1px solid #34d39922;
+      border-radius: var(--radius-sm);
+      padding: .6rem 1rem;
+    }
+    .phase-criteria::before { content: '✓ '; }
+
+    /* =========================================================
+       DAILY TIMETABLE
+    ========================================================= */
+    .timetable-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    .time-slot {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .time-slot:hover { transform: translateY(-3px); box-shadow: var(--glow-blue); }
+    .time-slot::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      border-radius: 4px 0 0 4px;
+    }
+    .time-slot-1::before { background: var(--grad-a); }
+    .time-slot-2::before { background: var(--grad-b); }
+    .time-slot-3::before { background: var(--grad-c); }
+    .slot-time {
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      color: var(--text-3);
+      margin-bottom: .35rem;
+    }
+    .slot-title { font-size: 1rem; font-weight: 700; margin-bottom: .35rem; }
+    .slot-subjects { font-size: .83rem; color: var(--text-2); }
+
+    /* =========================================================
+       WEEKLY PLAN
+    ========================================================= */
+    .weekly-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: .85rem;
+    }
+    .day-card {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .day-card:hover { transform: translateY(-2px); box-shadow: var(--glow-purp); }
+    .day-card.sunday {
+      border-color: var(--grad-c);
+      background: #c77dff0a;
+    }
+    .day-name {
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--text-3);
+      margin-bottom: .65rem;
+    }
+    .day-card.sunday .day-name { color: var(--grad-c); }
+    .day-tasks { display: flex; flex-direction: column; gap: .35rem; }
+    .day-task {
+      font-size: .78rem;
+      color: var(--text-2);
+      padding: .25rem .5rem;
+      background: var(--bg-input);
+      border-radius: 5px;
+      border-left: 2px solid var(--border);
+    }
+    .day-card.sunday .day-task { border-left-color: var(--grad-c); }
+
+    /* =========================================================
+       MONTHLY MILESTONES
+    ========================================================= */
+    .milestones-list {
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+    }
+    .milestone-row {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      align-items: start;
+      gap: 1rem;
+    }
+    .milestone-month {
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--text-3);
+      padding-top: .1rem;
+    }
+    .milestone-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+    }
+    .milestone-item {
+      font-size: .8rem;
+      padding: .3em .8em;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      color: var(--text-2);
+      transition: border-color var(--transition);
+    }
+    .milestone-item.done {
+      border-color: var(--green);
+      color: var(--green);
+      background: #34d39910;
+    }
+
+    /* =========================================================
+       SKILL CHECKLIST
+    ========================================================= */
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: .6rem;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .7rem 1rem;
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .checklist-item:hover { border-color: var(--grad-a); }
+    .checklist-item.checked {
+      border-color: var(--green);
+      background: #34d39908;
+    }
+    .checklist-item input[type=checkbox] { 
+      display: none; 
+    }
+    .check-box {
+      width: 18px; height: 18px;
+      border: 2px solid var(--text-3);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+    .checklist-item.checked .check-box {
+      border-color: var(--green);
+      background: var(--green);
+    }
+    .check-mark {
+      font-size: .7rem;
+      color: #000;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .checklist-item.checked .check-mark { opacity: 1; }
+    .check-label { 
+      font-size: .87rem; 
+      color: var(--text-2); 
+      transition: color var(--transition);
+      flex: 1;
+    }
+    .checklist-item.checked .check-label { color: var(--text-3); text-decoration: line-through; }
+
+    /* =========================================================
+       PROGRESS BARS
+    ========================================================= */
+    .progress-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .progress-card {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .8rem;
+    }
+    .progress-label { font-size: .9rem; font-weight: 600; }
+    .progress-pct {
+      font-family: var(--font-mono);
+      font-size: .85rem;
+      font-weight: 700;
+    }
+    .progress-track {
+      height: 8px;
+      background: var(--bg-input);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1.2s cubic-bezier(.4,0,.2,1);
+      width: 0;
+    }
+    .fill-blue   { background: linear-gradient(90deg, var(--grad-a), #6b8aff); }
+    .fill-purp   { background: linear-gradient(90deg, var(--grad-b), var(--grad-c)); }
+    .fill-green  { background: linear-gradient(90deg, var(--green), #6ee7b7); }
+    .fill-cyan   { background: linear-gradient(90deg, var(--cyan), #67e8f9); }
+    .fill-overall{ background: linear-gradient(90deg, var(--grad-a), var(--grad-b), var(--grad-c)); }
+
+    /* =========================================================
+       CALENDAR
+    ========================================================= */
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .cal-nav-btn {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      width: 34px; height: 34px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all var(--transition);
+    }
+    .cal-nav-btn:hover { border-color: var(--grad-a); color: var(--grad-a); }
+    .cal-month-label { font-size: 1rem; font-weight: 700; }
+    .cal-days-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: .3rem;
+      margin-bottom: .3rem;
+    }
+    .cal-day-name {
+      text-align: center;
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--text-3);
+      padding: .3rem 0;
+      text-transform: uppercase;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: .3rem;
+    }
+    .cal-cell {
+      aspect-ratio: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .82rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: var(--bg-card2);
+    }
+    .cal-cell:hover { border-color: var(--grad-a); }
+    .cal-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+    .cal-cell.today { border-color: var(--grad-a); color: var(--grad-a); font-weight: 700; }
+    .cal-cell.studied {
+      background: linear-gradient(135deg, var(--grad-a)22, var(--grad-b)22);
+      border-color: var(--grad-b);
+      color: var(--grad-c);
+      font-weight: 600;
+    }
+    .cal-legend {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: .75rem;
+      font-size: .78rem;
+      color: var(--text-3);
+    }
+    .cal-legend span { display: flex; align-items: center; gap: .4rem; }
+    .leg-dot {
+      width: 10px; height: 10px;
+      border-radius: 3px;
+    }
+    .leg-studied { background: linear-gradient(135deg, var(--grad-a), var(--grad-b)); }
+    .leg-today   { border: 2px solid var(--grad-a); }
+
+    /* =========================================================
+       RESOURCES
+    ========================================================= */
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .resource-group {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .resource-group-title {
+      font-size: .9rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .resource-links { display: flex; flex-direction: column; gap: .5rem; }
+    .resource-link-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .6rem .8rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: .83rem;
+      color: var(--text-2);
+      text-decoration: none;
+      transition: all var(--transition);
+    }
+    .resource-link-item:hover {
+      border-color: var(--grad-a);
+      color: var(--grad-a);
+      transform: translateX(3px);
+    }
+
+    /* =========================================================
+       NOTES
+    ========================================================= */
+    .notes-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: .5rem;
+      margin-bottom: .75rem;
+    }
+    #notes-area {
+      width: 100%;
+      min-height: 240px;
+      resize: vertical;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-1);
+      padding: 1rem;
+      font-size: .9rem;
+      line-height: 1.7;
+      transition: border-color var(--transition);
+    }
+    #notes-area:focus {
+      outline: none;
+      border-color: var(--grad-a);
+      box-shadow: var(--glow-blue);
+    }
+    .notes-save-info {
+      font-size: .77rem;
+      color: var(--text-3);
+      margin-top: .5rem;
+      text-align: right;
+    }
+
+    /* =========================================================
+       STATISTICS
+    ========================================================= */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+    .stat-card {
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--glow-purp); }
+    .stat-icon { font-size: 1.5rem; margin-bottom: .5rem; }
+    .stat-value {
+      font-size: 1.9rem;
+      font-weight: 800;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: .35rem;
+    }
+    .stat-name { font-size: .78rem; color: var(--text-3); }
+
+    /* =========================================================
+       ACTION BUTTONS BAR
+    ========================================================= */
+    .actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+    }
+
+    /* =========================================================
+       BACK TO TOP
+    ========================================================= */
+    #back-top {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition), transform var(--transition);
+      z-index: 900;
+    }
+    #back-top.visible { opacity: 1; pointer-events: auto; }
+    #back-top:hover { transform: translateY(-3px); }
+
+    /* =========================================================
+       SEPARATOR
+    ========================================================= */
+    .section-sep {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    /* =========================================================
+       FADE-IN ANIMATION
+    ========================================================= */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* =========================================================
+       PRINT STYLES
+    ========================================================= */
+    @media print {
+      #nav, #back-top, .mobile-nav, .actions-bar,
+      .notes-toolbar, .cal-nav-btn { display: none !important; }
+      body { background: #fff; color: #000; }
+      main { padding-top: 1rem; }
+      .card, .time-slot, .day-card, .progress-card,
+      .resource-group, .stat-card { border: 1px solid #ccc; }
+    }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .hero-title { font-size: 2rem; }
+      .weekly-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+      .milestone-row { grid-template-columns: 70px 1fr; }
+      .roadmap-timeline::before { left: 22px; }
+      .phase-dot { width: 46px; height: 46px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION
+============================================================ -->
+<nav id="nav" aria-label="Main navigation">
+  <div class="nav-inner">
+    <span class="nav-logo">📚 Study Roadmap</span>
+    <ul class="nav-links" role="list">
+      <li><a class="nav-link" href="#hero">Home</a></li>
+      <li><a class="nav-link" href="#roadmap">Roadmap</a></li>
+      <li><a class="nav-link" href="#timetable">Timetable</a></li>
+      <li><a class="nav-link" href="#weekly">Weekly</a></li>
+      <li><a class="nav-link" href="#milestones">Milestones</a></li>
+      <li><a class="nav-link" href="#checklist">Skills</a></li>
+      <li><a class="nav-link" href="#progress">Progress</a></li>
+      <li><a class="nav-link" href="#calendar">Calendar</a></li>
+      <li><a class="nav-link" href="#resources">Resources</a></li>
+      <li><a class="nav-link" href="#notes">Notes</a></li>
+      <li><a class="nav-link" href="#statistics">Stats</a></li>
+    </ul>
+    <button class="nav-hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile nav -->
+<div class="mobile-nav" id="mobile-nav" role="navigation">
+  <a class="nav-link" href="#hero" onclick="closeMobileNav()">🏠 Home</a>
+  <a class="nav-link" href="#roadmap" onclick="closeMobileNav()">🗺 Roadmap</a>
+  <a class="nav-link" href="#timetable" onclick="closeMobileNav()">⏰ Timetable</a>
+  <a class="nav-link" href="#weekly" onclick="closeMobileNav()">📅 Weekly Plan</a>
+  <a class="nav-link" href="#milestones" onclick="closeMobileNav()">🎯 Milestones</a>
+  <a class="nav-link" href="#checklist" onclick="closeMobileNav()">✅ Skills</a>
+  <a class="nav-link" href="#progress" onclick="closeMobileNav()">📊 Progress</a>
+  <a class="nav-link" href="#calendar" onclick="closeMobileNav()">🗓 Calendar</a>
+  <a class="nav-link" href="#resources" onclick="closeMobileNav()">🔗 Resources</a>
+  <a class="nav-link" href="#notes" onclick="closeMobileNav()">📝 Notes</a>
+  <a class="nav-link" href="#statistics" onclick="closeMobileNav()">📈 Stats</a>
+</div>
+
+<main>
+
+  <!-- ==========================================================
+       HERO
+  =========================================================== -->
+  <section id="hero" aria-label="Hero">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <p class="hero-eyebrow">Your Learning Journey</p>
+    <h1 class="hero-title grad-text">Study Roadmap<br>&amp; Timetable</h1>
+    <p class="hero-subtitle">From English Intermediate → GED → Computer Science → Programming → Chinese Fluency</p>
+    <blockquote class="hero-quote">
+      "The secret of getting ahead is getting started. Small daily habits, compounded over time, create extraordinary results."
+    </blockquote>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val">3</div>
+        <div class="hero-stat-label">Phases</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">3h</div>
+        <div class="hero-stat-label">Daily Study</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" id="hero-streak">0</div>
+        <div class="hero-stat-label">Day Streak</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" id="hero-pct">0%</div>
+        <div class="hero-stat-label">Overall Progress</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       MASTER ROADMAP
+  =========================================================== -->
+  <section id="roadmap" aria-labelledby="roadmap-title" class="fade-in">
+    <h2 class="section-title" id="roadmap-title">
+      <span class="icon">🗺️</span> Master Roadmap
+    </h2>
+    <div class="card">
+      <div class="roadmap-timeline">
+
+        <!-- Phase 1 -->
+        <div class="phase-block">
+          <div class="phase-dot phase-dot-1">1</div>
+          <div class="phase-content">
+            <div class="phase-header">
+              <span class="phase-title">Phase 1 — English + GED</span>
+              <span class="badge badge-blue">Highest Priority</span>
+              <span class="badge badge-green">~12–18 months</span>
+            </div>
+            <p class="phase-goal">Reach Intermediate English level and pass all four GED subject tests to qualify for university enrollment at University of the People (UoPeople).</p>
+            <div class="skills-grid">
+              <span class="skill-tag">🇬🇧 English Grammar</span>
+              <span class="skill-tag">📖 Vocabulary</span>
+              <span class="skill-tag">👂 Listening</span>
+              <span class="skill-tag">🗣️ Speaking</span>
+              <span class="skill-tag">📚 Reading</span>
+              <span class="skill-tag">✏️ Writing</span>
+              <span class="skill-tag">🔢 GED Math</span>
+              <span class="skill-tag">🔬 GED Science</span>
+              <span class="skill-tag">🌍 GED Social Studies</span>
+              <span class="skill-tag">📝 GED Writing</span>
+            </div>
+            <p class="phase-criteria">Pass all 4 GED exams + achieve B1 English level → Apply to UoPeople Computer Science</p>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-block">
+          <div class="phase-dot phase-dot-2">2</div>
+          <div class="phase-content">
+            <div class="phase-header">
+              <span class="phase-title">Phase 2 — Web Programming</span>
+              <span class="badge badge-purp">After Phase 1</span>
+              <span class="badge badge-green">~9–15 months</span>
+            </div>
+            <p class="phase-goal">Build a strong foundation in web development by learning HTML, CSS, and JavaScript, then automate workflows with Google Apps Script. Complete multiple real-world projects before advancing.</p>
+            <div class="skills-grid">
+              <span class="skill-tag">🌐 HTML</span>
+              <span class="skill-tag">🎨 CSS</span>
+              <span class="skill-tag">⚡ JavaScript</span>
+              <span class="skill-tag">🤖 Google Apps Script</span>
+              <span class="skill-tag">🛠️ Projects ×10</span>
+            </div>
+            <p class="phase-criteria">Complete 10 projects covering HTML → CSS → JS → GAS before starting Phase 3</p>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="phase-block">
+          <div class="phase-dot phase-dot-3">3</div>
+          <div class="phase-content">
+            <div class="phase-header">
+              <span class="phase-title">Phase 3 — Chinese (HSK 1–5)</span>
+              <span class="badge badge-yellow">Do NOT start before Phase 2</span>
+              <span class="badge badge-green">~24–36 months</span>
+            </div>
+            <p class="phase-goal">Learn Mandarin Chinese systematically from beginner (HSK1) through upper-intermediate (HSK5), building vocabulary, reading, listening, and speaking across all levels.</p>
+            <div class="skills-grid">
+              <span class="skill-tag">🈶 HSK 1 — Beginner</span>
+              <span class="skill-tag">🈶 HSK 2 — Elementary</span>
+              <span class="skill-tag">🈶 HSK 3 — Pre-Intermediate</span>
+              <span class="skill-tag">🈶 HSK 4 — Intermediate</span>
+              <span class="skill-tag">🈶 HSK 5 — Upper-Intermediate</span>
+            </div>
+            <p class="phase-criteria">Pass official HSK 5 exam with a score of 180+ points</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       DAILY TIMETABLE
+  =========================================================== -->
+  <section id="timetable" aria-labelledby="timetable-title" class="fade-in">
+    <h2 class="section-title" id="timetable-title">
+      <span class="icon">⏰</span> Daily Timetable
+    </h2>
+    <div class="timetable-grid">
+      <div class="time-slot time-slot-1">
+        <div class="slot-time">21:00 – 22:00</div>
+        <div class="slot-title">English Grammar &amp; Vocabulary</div>
+        <div class="slot-subjects">Study grammar rules · Learn 10–15 new words · Practice in context · Review flashcards</div>
+      </div>
+      <div class="time-slot time-slot-2">
+        <div class="slot-time">22:00 – 23:00</div>
+        <div class="slot-title">Reading, Listening &amp; Speaking</div>
+        <div class="slot-subjects">Read articles/graded readers · Listen to podcasts/news · Shadow native speakers · Record yourself</div>
+      </div>
+      <div class="time-slot time-slot-3">
+        <div class="slot-time">23:00 – 24:00</div>
+        <div class="slot-title">GED Preparation</div>
+        <div class="slot-subjects">Rotate: Math · Science · Social Studies · Writing — one subject per session, rotate weekly</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       WEEKLY PLAN
+  =========================================================== -->
+  <section id="weekly" aria-labelledby="weekly-title" class="fade-in">
+    <h2 class="section-title" id="weekly-title">
+      <span class="icon">📅</span> Weekly Plan
+    </h2>
+    <div class="weekly-grid">
+      <div class="day-card">
+        <div class="day-name">Monday</div>
+        <div class="day-tasks">
+          <div class="day-task">21:00 Grammar + Vocab</div>
+          <div class="day-task">22:00 Reading Practice</div>
+          <div class="day-task">23:00 GED Math</div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-name">Tuesday</div>
+        <div class="day-tasks">
+          <div class="day-task">21:00 Grammar + Vocab</div>
+          <div class="day-task">22:00 Listening Practice</div>
+          <div class="day-task">23:00 GED Science</div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-name">Wednesday</div>
+        <div class="day-tasks">
+          <div class="day-task">21:00 Grammar + Vocab</div>
+          <div class="day-task">22:00 Speaking Practice</div>
+          <div class="day-task">23:00 GED Social Studies</div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-name">Thursday</div>
+        <div class="day-tasks">
+          <div class="day-task">21:00 Grammar + Vocab</div>
+          <div class="day-task">22:00 Reading Practice</div>
+          <div class="day-task">23:00 GED Writing</div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-name">Friday</div>
+        <div class="day-tasks">
+          <div class="day-task">21:00 Grammar + Vocab</div>
+          <div class="day-task">22:00 Listening + Speaking</div>
+          <div class="day-task">23:00 GED Mixed Review</div>
+        </div>
+      </div>
+      <div class="day-card">
+        <div class="day-name">Saturday</div>
+        <div class="day-tasks">
+          <div class="day-task">21:00 Deep Grammar Study</div>
+          <div class="day-task">22:00 Full Practice Test</div>
+          <div class="day-task">23:00 GED Mock Exam</div>
+        </div>
+      </div>
+      <div class="day-card sunday">
+        <div class="day-name">Sunday ✨</div>
+        <div class="day-tasks">
+          <div class="day-task">Review weekly progress</div>
+          <div class="day-task">Plan next week</div>
+          <div class="day-task">Rest &amp; recharge</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       MONTHLY MILESTONES
+  =========================================================== -->
+  <section id="milestones" aria-labelledby="milestones-title" class="fade-in">
+    <h2 class="section-title" id="milestones-title">
+      <span class="icon">🎯</span> Monthly Milestones
+    </h2>
+    <div class="card">
+      <div class="milestones-list" id="milestones-list">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       SKILL CHECKLIST
+  =========================================================== -->
+  <section id="checklist" aria-labelledby="checklist-title" class="fade-in">
+    <h2 class="section-title" id="checklist-title">
+      <span class="icon">✅</span> Skill Checklist
+    </h2>
+    <div class="card">
+      <div class="checklist-grid" id="checklist-grid">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       PROGRESS DASHBOARD
+  =========================================================== -->
+  <section id="progress" aria-labelledby="progress-title" class="fade-in">
+    <h2 class="section-title" id="progress-title">
+      <span class="icon">📊</span> Progress Dashboard
+    </h2>
+    <div class="progress-grid" id="progress-grid">
+      <!-- Generated by JS -->
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       CALENDAR
+  =========================================================== -->
+  <section id="calendar" aria-labelledby="calendar-title" class="fade-in">
+    <h2 class="section-title" id="calendar-title">
+      <span class="icon">🗓️</span> Study Calendar
+    </h2>
+    <div class="card">
+      <div class="calendar-header">
+        <button class="cal-nav-btn" id="cal-prev" aria-label="Previous month">‹</button>
+        <span class="cal-month-label" id="cal-month-label"></span>
+        <button class="cal-nav-btn" id="cal-next" aria-label="Next month">›</button>
+      </div>
+      <div class="cal-days-header" aria-hidden="true">
+        <div class="cal-day-name">Sun</div>
+        <div class="cal-day-name">Mon</div>
+        <div class="cal-day-name">Tue</div>
+        <div class="cal-day-name">Wed</div>
+        <div class="cal-day-name">Thu</div>
+        <div class="cal-day-name">Fri</div>
+        <div class="cal-day-name">Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-grid" role="grid" aria-label="Study calendar"></div>
+      <div class="cal-legend">
+        <span><span class="leg-dot leg-studied"></span> Studied</span>
+        <span><span class="leg-dot" style="border:2px solid var(--grad-a);border-radius:3px;"></span> Today</span>
+      </div>
+      <p style="font-size:.78rem;color:var(--text-3);margin-top:.75rem;">Click any day to mark it as a study day. Data saved automatically.</p>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       RESOURCES
+  =========================================================== -->
+  <section id="resources" aria-labelledby="resources-title" class="fade-in">
+    <h2 class="section-title" id="resources-title">
+      <span class="icon">🔗</span> Learning Resources
+    </h2>
+    <div class="resources-grid">
+      <!-- English -->
+      <div class="resource-group">
+        <div class="resource-group-title">🇬🇧 English</div>
+        <div class="resource-links">
+          <a class="resource-link-item" href="https://www.bbc.co.uk/learningenglish" target="_blank" rel="noopener">📻 BBC Learning English</a>
+          <a class="resource-link-item" href="https://www.duolingo.com" target="_blank" rel="noopener">🦜 Duolingo</a>
+          <a class="resource-link-item" href="https://www.efset.org" target="_blank" rel="noopener">📋 EF SET (Level Test)</a>
+          <a class="resource-link-item" href="https://www.grammarly.com" target="_blank" rel="noopener">✏️ Grammarly</a>
+          <a class="resource-link-item" href="https://www.englishclub.com" target="_blank" rel="noopener">📖 EnglishClub</a>
+          <a class="resource-link-item" href="#" style="color:var(--text-3)">🔗 Add your own resource…</a>
+        </div>
+      </div>
+      <!-- GED -->
+      <div class="resource-group">
+        <div class="resource-group-title">📝 GED</div>
+        <div class="resource-links">
+          <a class="resource-link-item" href="https://www.ged.com" target="_blank" rel="noopener">🏛️ GED.com (Official)</a>
+          <a class="resource-link-item" href="https://www.khanacademy.org" target="_blank" rel="noopener">📐 Khan Academy</a>
+          <a class="resource-link-item" href="https://www.gedtestingservice.com" target="_blank" rel="noopener">📊 GED Testing Service</a>
+          <a class="resource-link-item" href="https://www.kaplangedprep.com" target="_blank" rel="noopener">📘 Kaplan GED Prep</a>
+          <a class="resource-link-item" href="https://www.magoosh.com/ged" target="_blank" rel="noopener">🎓 Magoosh GED</a>
+          <a class="resource-link-item" href="#" style="color:var(--text-3)">🔗 Add your own resource…</a>
+        </div>
+      </div>
+      <!-- Programming -->
+      <div class="resource-group">
+        <div class="resource-group-title">💻 Programming</div>
+        <div class="resource-links">
+          <a class="resource-link-item" href="https://www.freecodecamp.org" target="_blank" rel="noopener">🆓 freeCodeCamp</a>
+          <a class="resource-link-item" href="https://www.theodinproject.com" target="_blank" rel="noopener">⚔️ The Odin Project</a>
+          <a class="resource-link-item" href="https://developer.mozilla.org" target="_blank" rel="noopener">🦊 MDN Web Docs</a>
+          <a class="resource-link-item" href="https://javascript.info" target="_blank" rel="noopener">⚡ JavaScript.info</a>
+          <a class="resource-link-item" href="https://developers.google.com/apps-script" target="_blank" rel="noopener">🤖 Google Apps Script Docs</a>
+          <a class="resource-link-item" href="#" style="color:var(--text-3)">🔗 Add your own resource…</a>
+        </div>
+      </div>
+      <!-- Chinese -->
+      <div class="resource-group">
+        <div class="resource-group-title">🇨🇳 Chinese</div>
+        <div class="resource-links">
+          <a class="resource-link-item" href="https://www.hsk.academy" target="_blank" rel="noopener">🈶 HSK Academy</a>
+          <a class="resource-link-item" href="https://www.hellotalk.com" target="_blank" rel="noopener">💬 HelloTalk</a>
+          <a class="resource-link-item" href="https://www.pleco.com" target="_blank" rel="noopener">📖 Pleco Dictionary</a>
+          <a class="resource-link-item" href="https://www.chinesepod.com" target="_blank" rel="noopener">🎙️ ChinesePod</a>
+          <a class="resource-link-item" href="https://www.skritter.com" target="_blank" rel="noopener">✍️ Skritter (Characters)</a>
+          <a class="resource-link-item" href="#" style="color:var(--text-3)">🔗 Add your own resource…</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       NOTES
+  =========================================================== -->
+  <section id="notes" aria-labelledby="notes-title" class="fade-in">
+    <h2 class="section-title" id="notes-title">
+      <span class="icon">📝</span> Notes
+    </h2>
+    <div class="card">
+      <div class="notes-toolbar">
+        <button class="btn" onclick="exportNotes()">⬇ Export .txt</button>
+        <button class="btn" onclick="clearNotes()">🗑 Clear Notes</button>
+      </div>
+      <textarea
+        id="notes-area"
+        placeholder="Write your study notes, goals, reflections, or anything you want to remember…&#10;&#10;Auto-saved to your browser as you type."
+        aria-label="Study notes"
+      ></textarea>
+      <p class="notes-save-info" id="notes-save-info">Notes auto-saved.</p>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       STATISTICS
+  =========================================================== -->
+  <section id="statistics" aria-labelledby="stats-title" class="fade-in">
+    <h2 class="section-title" id="stats-title">
+      <span class="icon">📈</span> Statistics
+    </h2>
+    <div class="stats-grid" id="stats-grid">
+      <!-- Generated by JS -->
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ==========================================================
+       ACTIONS
+  =========================================================== -->
+  <section aria-label="Actions" class="fade-in">
+    <h2 class="section-title"><span class="icon">⚙️</span> Actions</h2>
+    <div class="actions-bar">
+      <button class="btn btn-grad" onclick="window.print()">🖨️ Print Roadmap</button>
+      <button class="btn" onclick="exportChecklist()">📤 Export Checklist (JSON)</button>
+      <button class="btn" onclick="exportNotes()">📄 Export Notes (.txt)</button>
+      <button class="btn btn-danger" onclick="resetAll()">🔄 Reset All Progress</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Back to top -->
+<button id="back-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+'use strict';
+
+/* ----------------------------------------------------------
+   STORAGE HELPERS
+---------------------------------------------------------- */
+const LS = {
+  get: (k, def = null) => {
+    try { const v = localStorage.getItem(k); return v !== null ? JSON.parse(v) : def; }
+    catch { return def; }
+  },
+  set: (k, v) => {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch {}
+  }
+};
+
+/* ----------------------------------------------------------
+   DATA: SKILLS / CHECKLIST
+---------------------------------------------------------- */
+const SKILLS = [
+  { id:'eng-grammar',  label:'English Grammar',        phase:1 },
+  { id:'eng-vocab',    label:'English Vocabulary',     phase:1 },
+  { id:'eng-reading',  label:'English Reading',        phase:1 },
+  { id:'eng-listen',   label:'English Listening',      phase:1 },
+  { id:'eng-speaking', label:'English Speaking',       phase:1 },
+  { id:'eng-writing',  label:'English Writing',        phase:1 },
+  { id:'ged-math',     label:'GED Math',               phase:1 },
+  { id:'ged-science',  label:'GED Science',            phase:1 },
+  { id:'ged-social',   label:'GED Social Studies',     phase:1 },
+  { id:'ged-writing',  label:'GED Writing/RLA',        phase:1 },
+  { id:'html',         label:'HTML',                   phase:2 },
+  { id:'css',          label:'CSS',                    phase:2 },
+  { id:'javascript',   label:'JavaScript',             phase:2 },
+  { id:'gas',          label:'Google Apps Script',     phase:2 },
+  { id:'proj1',        label:'Project 1',              phase:2 },
+  { id:'proj2',        label:'Project 2',              phase:2 },
+  { id:'proj3',        label:'Project 3',              phase:2 },
+  { id:'proj4',        label:'Project 4',              phase:2 },
+  { id:'proj5',        label:'Project 5',              phase:2 },
+  { id:'proj6',        label:'Project 6',              phase:2 },
+  { id:'proj7',        label:'Project 7',              phase:2 },
+  { id:'proj8',        label:'Project 8',              phase:2 },
+  { id:'proj9',        label:'Project 9',              phase:2 },
+  { id:'proj10',       label:'Project 10',             phase:2 },
+  { id:'hsk1',         label:'HSK 1',                  phase:3 },
+  { id:'hsk2',         label:'HSK 2',                  phase:3 },
+  { id:'hsk3',         label:'HSK 3',                  phase:3 },
+  { id:'hsk4',         label:'HSK 4',                  phase:3 },
+  { id:'hsk5',         label:'HSK 5',                  phase:3 },
+];
+
+const MILESTONES = [
+  { month:'Month 1–2',   items:['Learn A2 Grammar basics','500 vocabulary words','GED Math foundations'] },
+  { month:'Month 3–4',   items:['B1 Grammar mastery','Reading comprehension A2→B1','GED Science basics'] },
+  { month:'Month 5–6',   items:['Speaking fluency (B1)','GED Social Studies','Mock GED test #1'] },
+  { month:'Month 7–8',   items:['English B1 certified','GED Writing/RLA','Mock GED test #2'] },
+  { month:'Month 9–10',  items:['GED Math exam','GED Science exam','Apply to UoPeople'] },
+  { month:'Month 11–12', items:['GED Social Studies exam','GED Writing exam','Phase 1 COMPLETE ✓'] },
+  { month:'Month 13–14', items:['HTML fundamentals','CSS layouts','First web page'] },
+  { month:'Month 15–16', items:['CSS advanced (Flexbox/Grid)','DOM JavaScript','Projects 1–3'] },
+  { month:'Month 17–18', items:['JavaScript ES6+','Projects 4–6','APIs & Fetch'] },
+  { month:'Month 19–21', items:['Google Apps Script','Projects 7–10','Phase 2 COMPLETE ✓'] },
+  { month:'Month 22–24', items:['HSK 1 — 150 words','Basic Mandarin tones','HSK 1 exam'] },
+  { month:'Month 25–27', items:['HSK 2 — 300 words','Simple conversations','HSK 2 exam'] },
+  { month:'Month 28–30', items:['HSK 3 — 600 words','Reading short texts','HSK 3 exam'] },
+  { month:'Month 31–36', items:['HSK 4 — 1200 words','HSK 4 exam','HSK 5 — 2500 words','HSK 5 exam','Phase 3 COMPLETE ✓'] },
+];
+
+/* ----------------------------------------------------------
+   PROGRESS CONFIG (linked to checklist counts)
+---------------------------------------------------------- */
+const PROGRESS_CONFIG = [
+  { id:'prog-english',     label:'English',      fillClass:'fill-blue',    skillIds:['eng-grammar','eng-vocab','eng-reading','eng-listen','eng-speaking','eng-writing'] },
+  { id:'prog-ged',         label:'GED',          fillClass:'fill-purp',    skillIds:['ged-math','ged-science','ged-social','ged-writing'] },
+  { id:'prog-programming', label:'Programming',  fillClass:'fill-green',   skillIds:['html','css','javascript','gas','proj1','proj2','proj3','proj4','proj5','proj6','proj7','proj8','proj9','proj10'] },
+  { id:'prog-chinese',     label:'Chinese (HSK)',fillClass:'fill-cyan',    skillIds:['hsk1','hsk2','hsk3','hsk4','hsk5'] },
+  { id:'prog-overall',     label:'Overall',      fillClass:'fill-overall', skillIds: SKILLS.map(s=>s.id) },
+];
+
+/* ----------------------------------------------------------
+   RENDER MILESTONES
+---------------------------------------------------------- */
+function renderMilestones() {
+  const el = document.getElementById('milestones-list');
+  el.innerHTML = MILESTONES.map(m => `
+    <div class="milestone-row">
+      <div class="milestone-month">${m.month}</div>
+      <div class="milestone-items">
+        ${m.items.map(item => `<span class="milestone-item">${item}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ----------------------------------------------------------
+   RENDER CHECKLIST
+---------------------------------------------------------- */
+function getCheckedSkills() {
+  return LS.get('skills_checked', {});
+}
+
+function toggleSkill(id) {
+  const checked = getCheckedSkills();
+  checked[id] = !checked[id];
+  LS.set('skills_checked', checked);
+  
+  // Update UI
+  const item = document.querySelector(`.checklist-item[data-id="${id}"]`);
+  if (item) {
+    if (checked[id]) {
+      item.classList.add('checked');
+      item.querySelector('input').checked = true;
+    } else {
+      item.classList.remove('checked');
+      item.querySelector('input').checked = false;
+    }
+  }
+  
+  updateProgress();
+  updateStats();
+}
+
+function renderChecklist() {
+  const checked = getCheckedSkills();
+  const grid = document.getElementById('checklist-grid');
+  const phaseLabels = { 1:'Phase 1', 2:'Phase 2', 3:'Phase 3' };
+  const phaseColors  = { 1:'badge-blue', 2:'badge-purp', 3:'badge-cyan' };
+
+  grid.innerHTML = SKILLS.map(skill => {
+    const isChecked = !!checked[skill.id];
+    return `
+      <div class="checklist-item${isChecked ? ' checked' : ''}" data-id="${skill.id}" onclick="toggleSkill('${skill.id}')">
+        <input type="checkbox" ${isChecked ? 'checked' : ''} aria-label="${skill.label}">
+        <span class="check-box"><span class="check-mark">✓</span></span>
+        <span class="check-label">${skill.label}</span>
+        <span class="badge ${phaseColors[skill.phase]}" style="margin-left:auto;font-size:.65rem">${phaseLabels[skill.phase]}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ----------------------------------------------------------
+   PROGRESS BARS
+---------------------------------------------------------- */
+function renderProgress() {
+  const grid = document.getElementById('progress-grid');
+  grid.innerHTML = PROGRESS_CONFIG.map(p => `
+    <div class="progress-card">
+      <div class="progress-header">
+        <span class="progress-label">${p.label}</span>
+        <span class="progress-pct" id="${p.id}-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill ${p.fillClass}" id="${p.id}-fill" style="width:0%"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateProgress() {
+  const checked = getCheckedSkills();
+  PROGRESS_CONFIG.forEach(p => {
+    const total = p.skillIds.length;
+    const done  = p.skillIds.filter(id => !!checked[id]).length;
+    const pct   = total ? Math.round((done / total) * 100) : 0;
+    const fill  = document.getElementById(p.id + '-fill');
+    const label = document.getElementById(p.id + '-pct');
+    if (fill)  fill.style.width  = pct + '%';
+    if (label) label.textContent = pct + '%';
+  });
+  // Update hero overall
+  const checked2 = getCheckedSkills();
+  const overall = Math.round((SKILLS.filter(s => !!checked2[s.id]).length / SKILLS.length) * 100);
+  const heroPct = document.getElementById('hero-pct');
+  if (heroPct) heroPct.textContent = overall + '%';
+}
+
+/* ----------------------------------------------------------
+   STATS
+---------------------------------------------------------- */
+function renderStats() {
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = `
+    <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" id="stat-done">0</div><div class="stat-name">Completed Tasks</div></div>
+    <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value" id="stat-rem">0</div><div class="stat-name">Remaining Tasks</div></div>
+    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value" id="stat-pct">0%</div><div class="stat-name">Completion %</div></div>
+    <div class="stat-card"><div class="stat-icon">🚀</div><div class="stat-value" id="stat-phase">1</div><div class="stat-name">Current Phase</div></div>
+    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value" id="stat-months">~45</div><div class="stat-name">Est. Months Left</div></div>
+    <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-value" id="stat-streak">0</div><div class="stat-name">Study Streak</div></div>
+  `;
+}
+
+function updateStats() {
+  const checked = getCheckedSkills();
+  const done    = SKILLS.filter(s => !!checked[s.id]).length;
+  const total   = SKILLS.length;
+  const rem     = total - done;
+  const pct     = Math.round((done / total) * 100);
+
+  // Determine current phase
+  const p1done  = ['eng-grammar','eng-vocab','eng-reading','eng-listen','eng-speaking','eng-writing','ged-math','ged-science','ged-social','ged-writing'].every(id => !!checked[id]);
+  const p2done  = ['html','css','javascript','gas','proj1','proj2','proj3','proj4','proj5','proj6','proj7','proj8','proj9','proj10'].every(id => !!checked[id]);
+  const phase   = p1done && p2done ? 3 : p1done ? 2 : 1;
+
+  // Rough estimate months
+  const remainingMonths = Math.max(0, Math.round(45 * (1 - pct / 100)));
+
+  // Streak from calendar
+  const studiedDays = LS.get('studied_days', {});
+  const streak = calcStreak(studiedDays);
+
+  document.getElementById('stat-done').textContent   = done;
+  document.getElementById('stat-rem').textContent    = rem;
+  document.getElementById('stat-pct').textContent    = pct + '%';
+  document.getElementById('stat-phase').textContent  = phase;
+  document.getElementById('stat-months').textContent = '~' + remainingMonths;
+  document.getElementById('stat-streak').textContent = streak;
+  document.getElementById('hero-streak').textContent  = streak;
+}
+
+function calcStreak(studiedDays) {
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    if (studiedDays[key]) streak++;
+    else if (i > 0) break; // allow today to not be marked yet
+  }
+  return streak;
+}
+
+/* ----------------------------------------------------------
+   CALENDAR
+---------------------------------------------------------- */
+let calYear, calMonth;
+
+function renderCalendar() {
+  const now = new Date();
+  if (calYear === undefined) { calYear = now.getFullYear(); calMonth = now.getMonth(); }
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = `${monthNames[calMonth]} ${calYear}`;
+
+  const studiedDays = LS.get('studied_days', {});
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const todayStr = now.toISOString().slice(0,10);
+
+  // Empty cells before first day
+  for (let i = 0; i < firstDay; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell empty';
+    grid.appendChild(cell);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell';
+    cell.setAttribute('role','gridcell');
+    cell.setAttribute('aria-label', `${monthNames[calMonth]} ${d} ${calYear}`);
+    cell.textContent = d;
+    if (dateStr === todayStr) cell.classList.add('today');
+    if (studiedDays[dateStr]) cell.classList.add('studied');
+
+    cell.addEventListener('click', () => {
+      const days = LS.get('studied_days', {});
+      if (days[dateStr]) delete days[dateStr];
+      else days[dateStr] = true;
+      LS.set('studied_days', days);
+      cell.classList.toggle('studied');
+      updateStats();
+    });
+    grid.appendChild(cell);
+  }
+}
+
+document.getElementById('cal-prev').addEventListener('click', () => {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+});
+document.getElementById('cal-next').addEventListener('click', () => {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+});
+
+/* ----------------------------------------------------------
+   NOTES
+---------------------------------------------------------- */
+const notesArea = document.getElementById('notes-area');
+const notesSaveInfo = document.getElementById('notes-save-info');
+let notesSaveTimer;
+
+notesArea.value = LS.get('study_notes', '');
+
+notesArea.addEventListener('input', () => {
+  clearTimeout(notesSaveTimer);
+  notesSaveInfo.textContent = 'Saving…';
+  notesSaveTimer = setTimeout(() => {
+    LS.set('study_notes', notesArea.value);
+    notesSaveInfo.textContent = 'Saved at ' + new Date().toLocaleTimeString();
+  }, 600);
+});
+
+function clearNotes() {
+  if (!confirm('Clear all notes? This cannot be undone.')) return;
+  notesArea.value = '';
+  LS.set('study_notes', '');
+  notesSaveInfo.textContent = 'Notes cleared.';
+}
+
+function exportNotes() {
+  const blob = new Blob([notesArea.value], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'study-notes.txt';
+  a.click();
+}
+
+/* ----------------------------------------------------------
+   EXPORT CHECKLIST
+---------------------------------------------------------- */
+function exportChecklist() {
+  const checked = getCheckedSkills();
+  const data = SKILLS.map(s => ({
+    id: s.id,
+    label: s.label,
+    phase: s.phase,
+    completed: !!checked[s.id]
+  }));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'skill-checklist.json';
+  a.click();
+}
+
+/* ----------------------------------------------------------
+   RESET ALL
+---------------------------------------------------------- */
+function resetAll() {
+  if (!confirm('⚠️ This will delete ALL progress, including checklist, calendar, and notes. Are you sure?')) return;
+  if (!confirm('Last warning — this action cannot be undone. Continue?')) return;
+  localStorage.removeItem('skills_checked');
+  localStorage.removeItem('studied_days');
+  localStorage.removeItem('study_notes');
+  notesArea.value = '';
+  renderChecklist();
+  renderCalendar();
+  updateProgress();
+  updateStats();
+  alert('All progress has been reset.');
+}
+
+/* ----------------------------------------------------------
+   NAVIGATION: SCROLL SPY + HAMBURGER
+---------------------------------------------------------- */
+const navLinks = document.querySelectorAll('.nav-link');
+const sections = document.querySelectorAll('section[id]');
+
+function updateActiveLink() {
+  let current = '';
+  sections.forEach(sec => {
+    const top = sec.getBoundingClientRect().top;
+    if (top <= 100) current = sec.id;
+  });
+  navLinks.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+}
+
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const mobileNav = document.getElementById('mobile-nav');
+hamburger.addEventListener('click', () => {
+  const open = mobileNav.classList.toggle('open');
+  hamburger.setAttribute('aria-expanded', open);
+});
+function closeMobileNav() {
+  mobileNav.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
+}
+
+/* ----------------------------------------------------------
+   BACK TO TOP
+---------------------------------------------------------- */
+const backTop = document.getElementById('back-top');
+
+window.addEventListener('scroll', () => {
+  backTop.classList.toggle('visible', window.scrollY > 400);
+  updateActiveLink();
+});
+
+/* ----------------------------------------------------------
+   FADE-IN OBSERVER
+---------------------------------------------------------- */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      // Trigger progress bar animation when section becomes visible
+      if (e.target.contains(document.getElementById('progress-grid'))) {
+        setTimeout(updateProgress, 100);
+      }
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+/* ----------------------------------------------------------
+   INIT
+---------------------------------------------------------- */
+function init() {
+  renderMilestones();
+  renderChecklist();
+  renderProgress();
+  renderStats();
+  renderCalendar();
+  // Delay progress bars for animation on load
+  setTimeout(updateProgress, 400);
+  updateStats();
+}
+
+init();
+</script>
+
+</body>
+</html>
